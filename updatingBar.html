@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>D3 Page Template</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div></div>
+    <p>Click on this text to update the chart with new data values.</p>
+    <script type="text/javascript">
+      // Your beautiful D3 code will go here
+      // d3.select("body").append("p").text("Hello World! Boom!");
+
+      let dataset = [
+        5,
+        10,
+        13,
+        19,
+        21,
+        25,
+        22,
+        18,
+        15,
+        13,
+        11,
+        12,
+        15,
+        20,
+        18,
+        17,
+        16,
+        18,
+        23,
+        25,
+      ];
+
+      //Width and height
+      const w = 600;
+      const h = 250;
+      padding = 20;
+
+      let xScale = d3
+        .scaleBand()
+        .domain(d3.range(dataset.length))
+        .rangeRound([padding, w - 2 * padding])
+        .paddingInner(0.05);
+
+      let yScale = d3
+        .scaleLinear()
+        .domain([0, d3.max(dataset)])
+        .range([0, h - padding]);
+
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h);
+
+      let xAxis = d3.axisBottom().scale(xScale);
+
+      /*
+            let yAxis = d3.axisLeft().scale(yScale).ticks(5);
+            */
+
+      svg
+        .selectAll("rect")
+        .data(dataset)
+        .enter()
+        .append("rect")
+        .attr("x", (d, i) => xScale(i))
+        .attr("y", (d) => h - padding - yScale(d))
+        .attr("width", xScale.bandwidth())
+        .attr("height", (d) => yScale(d))
+        .attr("fill", "steelblue");
+
+      svg
+        .selectAll("text")
+        .data(dataset)
+        .enter()
+        .append("text")
+        .text(function (d) {
+          return d;
+        })
+        .attr("text-anchor", "middle")
+        .attr("x", (d, i) => xScale(i) + xScale.bandwidth() / 2)
+        .attr("y", (d) => h - padding - yScale(d) + 14)
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "11px")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle");
+
+      svg
+        .append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + (h - padding) + ")")
+        .call(xAxis);
+
+      /*
+            svg
+              .append("g")
+              .attr("class", "axis")
+              .attr("transform", "translate(" + padding + ",0)")
+              .call(yAxis);
+      */
+
+      d3.select("p").on("click", function () {
+        //New values for dataset
+        //New values for dataset\
+
+        const maxValue = 99;
+
+        let numValues = dataset.length;
+        dataset = [];
+        for (let i = 0; i < numValues; i++) {
+          //Count original length of dataset
+          //Initialize empty array
+          //Loop numValues times
+          let newNumber = Math.floor(Math.random() * maxValue); //New random integer (0-24)
+          dataset.push(newNumber); //Add new number to array
+        }
+
+        yScale.domain([0, d3.max(dataset)]);
+
+        //Update all rects
+        svg
+          .selectAll("rect")
+          .data(dataset)
+          .transition()
+          .duration(1250)
+          .delay((d, i) => (i / dataset.length) * 1000)
+          .attr("y", (d) => h - padding - yScale(d))
+          .attr("height", (d) => yScale(d));
+
+        svg
+          .selectAll("text")
+          .data(dataset)
+          .transition()
+          .duration(1250)
+          .delay((d, i) => (i / dataset.length) * 1000)
+          .text(function (d) {
+            return d;
+          })
+          .attr("x", (d, i) => xScale(i) + xScale.bandwidth() / 2)
+          .attr("y", (d) => h - padding - yScale(d) + 14);
+      });
+    </script>
+  </body>
+</html>
