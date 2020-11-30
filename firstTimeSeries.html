@@ -13,6 +13,28 @@
       //
       //	This page is here just so D3 is loaded into memory.
       //	Then you can test out D3 functions in the console.
+
+      //Width and height
+      const w = 500;
+      const h = 300;
+      const padding = 40;
+
+      let dataset, xScale, yScale; //Empty, for now
+
+      //For converting strings to Dates
+      const parseTime = d3.timeParse("%m/%d/%y");
+
+      //For converting Dates to strings
+      const formatTime = d3.timeFormat("%b %e");
+
+      //Function for converting CSV values from strings to Dates and numbers
+      const rowConverter = function (d) {
+        return {
+          Date: parseTime(d.Date),
+          Amount: parseInt(d.Amount),
+        };
+      };
+
       d3.csv("data/time_scale_data.csv", function (error, data) {
         if (error) {
           // Error message
@@ -24,7 +46,68 @@
           dataset = data;
         }
       });
+
       //
+      xScale = d3
+        .scaleTime()
+        .domain([
+          d3.min(dataset, function (d) {
+            return d.Date;
+          }),
+          d3.max(dataset, function (d) {
+            return d.Date;
+          }),
+        ])
+        .range([padding, w - padding]);
+
+      yScale = d3
+        .scaleLinear()
+        .domain([
+          d3.min(dataset, function (d) {
+            return d.Amount;
+          }),
+          d3.max(dataset, function (d) {
+            return d.Amount;
+          }),
+        ])
+        .range([h - padding, padding]);
+
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h);
+
+      svg
+        .selectAll("circle")
+        .data(dataset)
+        .enter()
+        .append("circle")
+        .attr("cx", function (d) {
+          return xScale(d.Date);
+        })
+        .attr("cy", function (d) {
+          return yScale(d.Amount);
+        });
+
+      // Add Labels
+      svg
+        .selectAll("text")
+        .data(dataset)
+        .enter()
+        .append("text")
+        .text(function (d) {
+          return formatTime(d.Date);
+        })
+        .attr("x", function (d) {
+          return xScale(d.Date) + 4;
+        })
+        .attr("y", function (d) {
+          return yScale(d.Amount) + 4;
+        })
+        .attr("font-family", "serif")
+        .attr("font-size", "11px")
+        .attr("fill", "red");
     </script>
   </body>
 </html>
