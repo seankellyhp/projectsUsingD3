@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>D3 Page Template</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div></div>
+
+    <script type="text/javascript">
+      // Your beautiful D3 code will go here
+      // d3.select("body").append("p").text("Hello World! Boom!");
+      /*
+                  const rowConverter = function (d) {
+                    return {
+                      Food: d.Food,
+                      Deliciousness: parseFloat(d.Deliciousness),
+                    };
+                  };
+
+                  d3.csv("food.csv", function (error, data) {
+                    if (error) {
+                      // Error message
+                      console.log(error);
+                    } else {
+                      console.log(rowConverter(data));
+
+                      // Include other code using a new dataset after ensuring it has loaded successfully.
+                      dataset = data;
+                    }
+                  });
+            */
+      const exampleData = [
+        25,
+        7,
+        5,
+        26,
+        11,
+        8,
+        25,
+        14,
+        23,
+        19,
+        14,
+        11,
+        22,
+        29,
+        11,
+        13,
+        12,
+        17,
+        18,
+        10,
+        24,
+        18,
+        25,
+        9,
+        3,
+      ];
+
+      //d3.select("body")
+      //  .selectAll("p")
+      //  .data(exampleData)
+      //  .enter()
+      //  .append("p")
+      //  .text(function (d) {
+      //    return `I love Sophie ${d} times`;
+      //  })
+      //  .style("color", function (d) {
+      //    if (d >= 15) {
+      //      return "red";
+      //    } else {
+      //      return "black";
+      //    }
+      //  });
+
+      /*
+                  d3.select("body")
+                    .selectAll("div")
+                    .data(exampleData)
+                    .enter()
+                    .append("div")
+                    .attr("class", "bar")
+                    .style("height", function (d) {
+                      const barHeight = d * 15;
+                      return barHeight + "px";
+                      ß;
+                    });
+
+                  d3.select("body")
+                    .transition()
+                    .style("background-color", "black")
+                    .duration(10000)
+                    .delay(function (d, i) {
+                      return i * 10;
+                    });
+
+                  // Page 121 in Interacive Data Viz for the Web
+                */
+
+      //Width and height
+      const w = 500;
+      const h = 120;
+      const barPadding = 3;
+      const barScale = 4;
+
+      let xScale = d3
+        .scaleLinear()
+        .domain([0, exampleData.length])
+        .range([0, w]);
+
+      let yScale = d3
+        .scaleLinear()
+        .domain([
+          0,
+          d3.max(exampleData, function (d) {
+            return d[1];
+          }),
+        ])
+        .range([0, h]);
+
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h);
+
+      let xAxis = d3.axisBottom().scale(xScale);
+      var yAxis = d3.axisLeft().scale(yScale).ticks(5);
+
+      svg
+        .selectAll("rect")
+        .data(exampleData)
+        .enter()
+        .append("rect")
+        .attr("x", function (d, i) {
+          return i * (w / exampleData.length);
+        })
+        .attr("y", function (d) {
+          return h - d * barScale; //Height minus data value
+        })
+        .attr("width", w / exampleData.length - barPadding)
+        .attr("height", function (d) {
+          return d * barScale;
+        })
+        .attr("fill", "lightblue");
+
+      svg
+        .selectAll("text")
+        .data(exampleData)
+        .enter()
+        .append("text")
+        .text(function (d) {
+          return d;
+        })
+        .attr("x", function (d, i) {
+          return (
+            i * (w / exampleData.length) +
+            (w / exampleData.length - barPadding) / 2
+          );
+        })
+        .attr("y", function (d) {
+          return h - d * barScale + 14; //Height minus data value
+        })
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "11px")
+        .attr("fill", "white")
+        .attr("text-anchor", "middle");
+
+      svg
+        .append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0," + (h - barPadding) + ")")
+        .call(xAxis);
+
+      svg
+        .append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(" + (barPadding - 3) + ",0)")
+        .call(yAxis);
+    </script>
+  </body>
+</html>
