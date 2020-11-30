@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>D3: Empty page for testing scale functions</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style type="text/css">
+      /* No style rules here yet */
+    </style>
+  </head>
+  <body>
+    <script type="text/javascript">
+      //
+      //	This page is here just so D3 is loaded into memory.
+      //	Then you can test out D3 functions in the console.
+      d3.csv("data/time_scale_data.csv", function (error, data) {
+        if (error) {
+          // Error message
+          console.log(error);
+        } else {
+          console.log(rowConverter(data));
+
+          // Include other code using a new dataset after ensuring it has loaded successfully.
+          dataset = data;
+        }
+      });
+      //
+    </script>
+  </body>
+</html>
