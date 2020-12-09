@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>D3: A bar chart whose data updates with new data</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style type="text/css">
+      /* No style rules here yet */
+    </style>
+  </head>
+  <body>
+    <p id="add">Click to Add Data.</p>
+
+    <p id="remove">Click to Remove Data.</p>
+
+    <p id="both">Remove Old Data and Update</p>
+
+    <script type="text/javascript">
+      let dataset = [
+        { key: 0, value: 5 },
+        { key: 1, value: 10 },
+        { key: 2, value: 13 },
+        { key: 3, value: 19 },
+        { key: 4, value: 21 },
+        { key: 5, value: 25 },
+        { key: 6, value: 22 },
+        { key: 7, value: 18 },
+        { key: 8, value: 15 },
+        { key: 9, value: 13 },
+        { key: 10, value: 11 },
+        { key: 11, value: 12 },
+        { key: 12, value: 15 },
+        { key: 13, value: 20 },
+        { key: 14, value: 18 },
+        { key: 15, value: 17 },
+        { key: 16, value: 16 },
+        { key: 17, value: 18 },
+        { key: 18, value: 23 },
+        { key: 19, value: 25 },
+      ];
+
+      const key = function (d) {
+        return d.key;
+      };
+
+      const returnValue = function (d) {
+        return d.value;
+      };
+
+      //Width and height
+      const w = 600;
+      const h = 250;
+
+      let xScale = d3
+        .scaleBand()
+        .domain(d3.range(dataset.length))
+        .rangeRound([0, w])
+        .paddingInner(0.05);
+
+      let yScale = d3
+        .scaleLinear()
+        .domain([0, d3.max(dataset, returnValue)])
+        .range([0, h]);
+
+      //Create SVG element
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h);
+
+      //Create bars
+      svg
+        .selectAll("rect")
+        .data(dataset, key)
+        .enter()
+        .append("rect")
+        .attr("x", function (d, i) {
+          return xScale(i);
+        })
+        .attr("y", function (d) {
+          return h - yScale(d.value);
+        })
+        .attr("width", xScale.bandwidth())
+        .attr("height", function (d) {
+          return yScale(d.value);
+        })
+        .attr("fill", function (d) {
+          return "rgb(0, 0, " + Math.round(d.value * 10) + ")";
+        });
+
+      //On click, update with new data
+      d3.selectAll("p").on("click", function () {
+        let paragraphID = d3.select(this).attr("id");
+
+        if (paragraphID === "add") {
+          //Add new value to dataset
+          const maxValue = 24;
+          const minValue = 1;
+          let newNumber = Math.floor(Math.random() * maxValue + minValue);
+          let lastKeyValue = dataset[dataset.length - 1].key;
+          dataset.push({
+            key: lastKeyValue + 1,
+            value: newNumber,
+          });
+        } else if (paragraphID === "remove") {
+          //Remove one value from dataset
+          dataset.shift();
+        } else {
+          // Do both
+          // Remove Old
+          dataset.shift();
+
+          // Add New
+          const maxValue = 24;
+          const minValue = 1;
+          let newNumber = Math.floor(Math.random() * maxValue + minValue);
+          let lastKeyValue = dataset[dataset.length - 1].key;
+          dataset.push({
+            key: lastKeyValue + 1,
+            value: newNumber,
+          });
+        }
+
+        //Update all rects
+        xScale.domain(d3.range(dataset.length));
+
+        yScale.domain([0, d3.max(dataset, returnValue)]);
+
+        //Select...
+        let bars = svg.selectAll("rect").data(dataset, key);
+
+        bars
+          .enter()
+          .append("rect")
+          .attr("x", w)
+          .attr("y", function (d) {
+            return h - yScale(d.value);
+          })
+          .attr("width", xScale.bandwidth())
+          .attr("height", function (d) {
+            return yScale(d.value);
+          })
+          .attr("fill", function (d) {
+            return "rgb(0, 0, " + Math.round(d.value * 10) + ")";
+          })
+          .merge(bars)
+          .transition()
+          .duration(500)
+          .attr("x", function (d, i) {
+            return xScale(i);
+          })
+          .attr("y", function (d) {
+            return h - yScale(d.value);
+          })
+          .attr("width", xScale.bandwidth())
+          .attr("height", function (d) {
+            return yScale(d.value);
+          });
+
+        //Exit…
+        bars
+          .exit()
+          .transition()
+          .duration(500)
+          .attr("x", -xScale.bandwidth()) // <-- Exit stage left
+          .remove();
+      });
+    </script>
+  </body>
+</html>
