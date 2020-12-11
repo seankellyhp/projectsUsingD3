@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>D3: A starting point for interactivity</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style type="text/css">
+      text {
+        font-family: serif;
+        font-size: 12px;
+        fill: white;
+      }
+
+      .middleHighlight {
+        font-family: serif;
+        font-size: 16px;
+        fill: black;
+      }
+
+      #tooltip {
+        position: absolute;
+        padding: 2px;
+        background-color: white;
+        pointer-events: none;
+      }
+
+      #tooltip.circle {
+        background-color: white;
+        border-radius: 50%;
+        height: 120px;
+        width: 145px;
+      }
+
+      #tooltip.hidden {
+        display: none;
+      }
+      #tooltip p {
+        font-family: serif;
+        text-align: center;
+        font-size: 16px;
+        line-height: 20px;
+        margin-top: 15px;
+        margin-left: 5px;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tooltip" class="hidden circle">
+      <p><strong>Highlights</strong></p>
+      <p><span id="number">100</span> units sold.</p>
+      <p><span id="value">100</span>% of total.</p>
+    </div>
+
+    <script type="text/javascript">
+      const h = 300;
+      const w = 300;
+      const padding = 600;
+
+      // Define Data
+      const dataset = [10, 10, 20, 40, 80, 160];
+
+      // Calculate Arcs
+      const outerRadius = w / 2;
+      const innerRadius = w / 3;
+      const arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius);
+
+      // Reformat Data with Pie function
+      const pie = d3.pie();
+
+      // Define Color Scheme
+      const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+      // Sum Function
+      const arrSum = function (arr) {
+        return arr.reduce(function (a, b) {
+          return a + b;
+        }, 0);
+      };
+
+      // Create SVG
+      const svg = d3
+        .select("body")
+        .append("svg")
+        .attr("height", h)
+        .attr("width", w);
+
+      // Create Wedge/Arc Groups
+      const arcs = svg
+        .selectAll("g.arc")
+        .data(pie(dataset))
+        .enter()
+        .append("g")
+        .attr("class", "arc")
+        .attr(
+          "transform",
+          "translate(" + outerRadius + ", " + outerRadius + ")"
+        );
+
+      // Draw Pie
+      arcs
+        .append("path")
+        .attr("fill", function (d, i) {
+          return color(i);
+        })
+        .attr("d", arc);
+
+      const totalValue = arrSum(dataset);
+
+      // Add Text Labels
+      arcs
+        .append("text")
+        .attr("transform", function (d) {
+          return "translate(" + arc.centroid(d) + ")";
+        })
+        .attr("text-anchor", "middle")
+        .text(function (d) {
+          return `${Math.round((d.value / totalValue) * 1000) / 10}%`;
+        });
+
+      svg
+        .append("text")
+        .attr("class", "middleHighlight")
+        .attr("x", w / 2)
+        .attr("y", h / 2)
+        .attr("text-anchor", "middle")
+        .text(`Total Sales = $${totalValue},000`);
+
+      arcs.on("mouseover", function (d) {
+        const title = "Highlights";
+        const count = d.value * 1000;
+
+        const percent = `${Math.round((d.value / totalValue) * 1000) / 10}`;
+
+        d3.select("#tooltip")
+          .style("left", w / 2 + "px")
+          .style("top", h / 2 + "px")
+          .style("transform", "translate(" + -1 * 45 + "%, " + -1 * 50 + "%)")
+          .select("#number")
+          .text(count.toLocaleString());
+
+        d3.select("#tooltip").select("#value").text(percent);
+
+        //Show the tooltip
+        d3.select("#tooltip").classed("hidden", false);
+      });
+
+      arcs.on("mouseout", function () {
+        d3.select("#tooltip").classed("hidden", true);
+      });
+    </script>
+  </body>
+</html>
