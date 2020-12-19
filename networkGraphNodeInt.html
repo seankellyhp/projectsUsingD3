@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>D3: Force Layout</title>
+    <head>
+      <script src="https://d3js.org/d3.v4.min.js"></script>
+    </head>
+    <style type="text/css">
+      /* No style rules here yet */
+    </style>
+  </head>
+  <body>
+    <script type="text/javascript">
+      //Width and height
+      var w = 700;
+      var h = 700;
+
+      //Original data
+      var dataset = {
+        nodes: [
+          { name: "Adam", size: 20 },
+          { name: "Bob", size: 5 },
+          { name: "Carrie", size: 15 },
+          { name: "Donovan", size: 5 },
+          { name: "Edward", size: 25 },
+          { name: "Felicity", size: 10 },
+          { name: "George", size: 15 },
+          { name: "Hannah", size: 20 },
+          { name: "Iris", size: 10 },
+          { name: "Jerry", size: 5 },
+        ],
+        edges: [
+          { source: 0, target: 1 },
+          { source: 0, target: 2 },
+          { source: 0, target: 3 },
+          { source: 0, target: 4 },
+          { source: 1, target: 5 },
+          { source: 2, target: 5 },
+          { source: 2, target: 5 },
+          { source: 3, target: 4 },
+          { source: 5, target: 8 },
+          { source: 5, target: 9 },
+          { source: 6, target: 7 },
+          { source: 7, target: 8 },
+          { source: 8, target: 9 },
+        ],
+      };
+
+      const linkNodes = [];
+
+      dataset.edges.forEach(function (link) {
+        linkNodes.push({
+          source: dataset.nodes[link.source],
+          target: dataset.nodes[link.target],
+        });
+      });
+
+      //console.log(linkNodes);
+
+      //Initialize a simple force layout, using the nodes and edges in dataset
+      var force = d3
+        .forceSimulation(dataset.nodes)
+        .force("charge", d3.forceManyBody())
+        .nodes(dataset.nodes.concat(linkNodes))
+        .force("link", d3.forceLink(dataset.edges))
+        .force(
+          "center",
+          d3
+            .forceCenter()
+            .x(w / 2)
+            .y(h / 2)
+        );
+      var colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+      //Create SVG element
+      var svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", w)
+        .attr("height", h);
+
+      //Create edges as lines
+      var edges = svg
+        .selectAll("line")
+        .data(dataset.edges)
+        .enter()
+        .append("line")
+        .style("stroke", "white")
+        .style("stroke-width", 0.5);
+
+      //Create nodes as circles
+      var nodes = svg
+        .selectAll("circle")
+        .data(dataset.nodes)
+        .enter()
+        .append("circle")
+        .attr("r", function (d, i) {
+          return d.size;
+        })
+        .style("fill", function (d) {
+          if (d.size > 15) {
+            return "red";
+          } else {
+            return "grey";
+          }
+        })
+        .call(
+          d3
+            .drag() //Define what to do on drag events
+            .on("start", dragStarted)
+            .on("drag", dragging)
+            .on("end", dragEnded)
+        );
+
+      //Add a simple tooltip
+      nodes.append("title").text(function (d) {
+        return d.name;
+      });
+
+      var linkNode = svg
+        .selectAll(".link-node")
+        .data(linkNodes)
+        .enter()
+        .append("circle")
+        .attr("r", 2)
+        .style("fill", "white")
+        .style("fill-opacity", "0.0");
+
+      //Every time the simulation "ticks", this will be called
+      force.on("tick", function () {
+        edges
+          .attr("x1", function (d) {
+            return d.source.x;
+          })
+          .attr("y1", function (d) {
+            return d.source.y;
+          })
+          .attr("x2", function (d) {
+            return d.target.x;
+          })
+          .attr("y2", function (d) {
+            return d.target.y;
+          });
+
+        nodes
+          .attr("cx", function (d) {
+            return d.x;
+          })
+          .attr("cy", function (d) {
+            return d.y;
+          });
+
+        linkNode
+          .attr("cx", function (d) {
+            return (d.x = (d.source.x + d.target.x) * 0.5);
+          })
+          .attr("cy", function (d) {
+            return (d.y = (d.source.y + d.target.y) * 0.5);
+          });
+      });
+
+      //Define drag event functions
+      function dragStarted(d) {
+        if (!d3.event.active) force.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+      }
+
+      function dragging(d) {
+        d.fx = d3.event.x;
+        d.fy = d3.event.y;
+      }
+
+      function dragEnded(d) {
+        if (!d3.event.active) force.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+      }
+
+      // Custom Symbols instead of Circles
+      //var svg = d3.select('body').append('svg');
+      //svg.append('g').selectAll('.myPoint')
+      //.data(D)
+      //.enter()
+      //.append('image')
+      //.attr("xlink:href", function(d){ return d.src })
+      //.attr("x", function(d){ return d.x })
+      //.attr("y", function(d){ return d.y })
+      //.attr("width", 16)
+      //.attr("height", 16);
+    </script>
+  </body>
+</html>
